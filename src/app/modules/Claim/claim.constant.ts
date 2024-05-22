@@ -1,9 +1,29 @@
-export const itemSearchableFields: string[] = [
-  "name",
-  "location",
-  "description",
+export const claimSearchableFields: string[] = [
+  "distinguishingFeatures",
+  // "founditem.category.name",
+  "lostItem.description",
+  "foundItem.description",
+  "foundItem.contactNo",
+  "lostItem.contactNo",
+  "user.email",
+  "user.name",
+ 
+
+
 ];
-export const itemFilterableFields: string[] = [
-  "name",
-  "searchTerm","location"
+export const claimFilterableFields: string[] = [
+
+  "searchTerm",
+  "status",
+  "lostDate",
+  "founditem.location",
+  "lostItem.location",
+  "founditem.category.name",
+  "lostItem.category.name",
+  "lostItem.lostItemStatus",
+  "lostItem.foundItemStatus",
+  "createdAt",
+  // "updatedAt",
+  // "user.profile.age",
+  
 ];

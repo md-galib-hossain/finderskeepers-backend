@@ -5,6 +5,9 @@ const createClaim = z.object({
     foundItemId: z.string({
       required_error: "foundItemId field is required",
     }),
+    lostItemId: z.string({
+      required_error: "lostItemId field is required",
+    }),
     distinguishingFeatures: z.string({
       required_error: "distinguishingFeatures field is required",
     }),

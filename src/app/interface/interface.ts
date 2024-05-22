@@ -1,3 +1,5 @@
+import { UserRole, UserStatus } from "@prisma/client";
+
 export type TSendResponse<T> = {
   statusCode: number;
   success: boolean;
@@ -17,3 +19,54 @@ export type TPaginationOptions = {
   sortOrder?: string | undefined;
 }
 
+export type TCloudinaryResponse={
+  asset_id: string;
+  public_id: string;
+  version: number;
+  version_id: string;
+  signature: string;
+  width: number;
+  height: number;
+  format: string;
+  resource_type: string;
+  created_at: string;       
+  tags: string[];
+  bytes: number;
+  type: string;
+  etag: string;  
+  placeholder: boolean;
+  url: string;
+  secure_url: string;
+  folder: string;
+  overwritten: boolean;
+  original_filename: string;
+  api_key: string
+}
+
+export type TFile = {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  destination: string;
+  filename: string;
+  path: string;
+  size: number
+}
+
+export type TAuthUser = {
+  email : string;
+  role : UserRole ;
+  status : UserStatus
+  id: string;
+  isDeleted : boolean
+} | null
+
+export type TGenericResponse<T> = {
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+  };
+  data: T;
+};

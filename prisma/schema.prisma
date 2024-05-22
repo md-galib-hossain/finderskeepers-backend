@@ -18,6 +18,7 @@ model User {
   name       String
   email      String       @unique
   password   String
+  isDeleted  Boolean      @default(false)
   role       UserRole     @default(USER)
   status     UserStatus   @default(ACTIVE)
   createdAt  DateTime     @default(now())
@@ -35,6 +36,7 @@ model UserProfile {
   bio       String
   age       Int
   createdAt DateTime @default(now())
+  isDeleted Boolean  @default(false)
   updatedAt DateTime @updatedAt
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id])
@@ -54,34 +56,41 @@ model ItemCategory {
 }
 
 model FoundItem {
-  id          String       @id @default(uuid())
-  userId      String
-  categoryId  String
-  name        String
-  description String
-  location    String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  user        User         @relation(fields: [userId], references: [id])
-  category    ItemCategory @relation(fields: [categoryId], references: [id])
-  claim       Claim[]
+  id              String         @id @default(uuid())
+  userId          String
+  categoryId      String
+  name            String
+  contactNo       String?
+  itemImg         String?
+  description     String
+  isDeleted       Boolean        @default(false)
+  location        String
+  foundItemStatus LostItemStatus @default(NOTFOUND)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  user            User           @relation(fields: [userId], references: [id])
+  category        ItemCategory   @relation(fields: [categoryId], references: [id])
+  claim           Claim[]
 
   @@map("founditems")
 }
 
 model LostItem {
-  id          String       @id @default(uuid())
-  userId      String
-  categoryId  String
-  name        String
-  description String
-  location    String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  user        User         @relation(fields: [userId], references: [id])
-  category    ItemCategory @relation(fields: [categoryId], references: [id])
-
-  claim Claim[]
+  id             String         @id @default(uuid())
+  userId         String
+  categoryId     String
+  name           String
+  description    String
+  location       String
+  isDeleted      Boolean        @default(false)
+  contactNo      String?
+  itemImg        String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  user           User           @relation(fields: [userId], references: [id])
+  category       ItemCategory   @relation(fields: [categoryId], references: [id])
+  lostItemStatus LostItemStatus @default(NOTFOUND)
+  claim          Claim[]
 
   @@map("lostitems")
 }
@@ -92,6 +101,7 @@ model Claim {
   status                 Status    @default(PENDING)
   foundItemId            String
   lostItemId             String
+  isDeleted              Boolean   @default(false)
   distinguishingFeatures String
   lostDate               DateTime
   createdAt              DateTime  @default(now())
@@ -112,6 +122,11 @@ enum Status {
 enum UserStatus {
   ACTIVE
   INACTIVE
+}
+
+enum LostItemStatus {
+  NOTFOUND
+  FOUND
 }
 
 enum UserRole {

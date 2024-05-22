@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const createItem = z.object({
-  body: z.object({
+
     categoryId: z.string({
       required_error: "categoryId field is required",
     }),
@@ -14,7 +14,7 @@ const createItem = z.object({
     location: z.string({
       required_error: "location field is required",
     }),
-  }),
+ 
 });
 
-export const itemValidations = { createItem };
+export const FoundItemValidations = { createItem };

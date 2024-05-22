@@ -1,16 +1,22 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import validateRequest from "../../middlewares/validateRequest";
-import { itemCategoryController } from "./foundItem.controller";
-import { itemValidations } from "./foundItem.validation";
+import { FoundItemController } from "./foundItem.controller";
+import { FoundItemValidations } from "./foundItem.validation";
+import { fileUploader } from "../../utils/fileUploader";
 
 const router = express.Router();
 
 router.post(
   "/found-items",
-  validateRequest(itemValidations.createItem),
-  itemCategoryController.createFoundItem
+  fileUploader.upload.single("file"),
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = FoundItemValidations.createItem.parse(
+      JSON.parse(req.body.data)
+    );
+    return FoundItemController.createFoundItem(req, res, next);
+  }
 );
-router.get("/found-items", itemCategoryController.getFoundItems);
+router.get("/found-items", FoundItemController.getFoundItems);
 // router.get("/users", userController.getUsers);
 
 export const FoundItemRoutes = router;

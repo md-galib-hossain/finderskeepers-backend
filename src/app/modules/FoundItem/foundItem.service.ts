@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import prisma from "../../utils/prisma";
-import { Prisma, User } from "@prisma/client";
+import { Prisma, User, UserStatus } from "@prisma/client";
 import { TPaginationOptions } from "../../interface/interface";
 import { paginationHelpers } from "../../utils/paginationHelper";
 import AppError from "../../errors/AppError";
@@ -9,9 +9,12 @@ import { verifyToken } from "../Auth/auth.utils";
 import config from "../../config";
 import { TItem } from "./foundItem.interface";
 import { founditemSearchableFields } from './foundItem.constant'
+import { fileUploader } from "../../utils/fileUploader";
 
 // Function to create a found item into the database
-const createFoundItemIntoDB = async (payload: TItem, token: string) => {
+const createFoundItemIntoDB = async (req: any, token: string) => {
+  const { file, body: payload } = req;
+
   // Checking if the specified item category exists
   const checkExist = await prisma.itemCategory.findUnique({
     where: {
@@ -27,15 +30,25 @@ const createFoundItemIntoDB = async (payload: TItem, token: string) => {
 
   // Verifying user authorization using the provided token
   const decoded = verifyToken(token, config.JWT.ACCESS_TOKEN_SECRET as string);
-  if (!decoded) {
+ 
+  if (!decoded || decoded?.status === UserStatus.INACTIVE) {
     throw new AppError(httpStatus.BAD_REQUEST, "You are unauthorized");
   }
 
   // Assigning the user ID to the payload
   payload.userId = decoded?.id;
 
-  // Creating the found item in the database
-  const result = await prisma.foundItem.create({
+  let result
+  try{
+    if (file) {
+      const image = await fileUploader.uploadToCloudinary(file);
+      if (image) {
+        payload.itemImg = image?.secure_url;
+      }
+    }
+
+     // Creating the found item in the database
+   result = await prisma.foundItem.create({
     data: payload,
     select: {
       id: true,
@@ -48,8 +61,16 @@ const createFoundItemIntoDB = async (payload: TItem, token: string) => {
       updatedAt: true,
       user: true,
       category: true,
+      itemImg : true,
     },
   });
+
+
+  }catch(err: any){
+    console.log(err);
+    throw Error(err);
+  }
+ 
 
   return result;
 };
@@ -127,6 +148,17 @@ const getFoundItemsfromDB = async (
     },
     data: result,
   };
+};
+
+const getSingleFoundItem = async (id: string) => {
+  const result = await prisma.foundItem.findUniqueOrThrow({
+    where : {
+      id : id,
+
+    }
+  })
+   
+  return result;
 };
 
 export const foundItemService = {

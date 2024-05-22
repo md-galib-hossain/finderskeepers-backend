@@ -1,17 +1,23 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import validateRequest from "../../middlewares/validateRequest";
-import { itemCategoryController } from "./lostItem.controller";
-import { itemValidations } from "./lostItem.validation";
+import { LostItemController } from "./lostItem.controller";
+import { LostItemValidations } from "./lostItem.validation";
+import { fileUploader } from "../../utils/fileUploader";
 
 const router = express.Router();
 
 
 router.post(
   "/lost-items",
-  validateRequest(itemValidations.createItem),
-  itemCategoryController.createLostItem
+  fileUploader.upload.single("file"),
+  (req: Request, res: Response, next: NextFunction) => {
+    req.body = LostItemValidations.createItem.parse(
+      JSON.parse(req.body.data)
+    );
+    return LostItemController.createLostItem(req, res, next);
+  }
 );
-router.get("/lost-items", itemCategoryController.getLostItems);
+router.get("/lost-items", LostItemController.getLostItems);
 // router.get("/users", userController.getUsers);
 
 export const LostItemRoutes = router;

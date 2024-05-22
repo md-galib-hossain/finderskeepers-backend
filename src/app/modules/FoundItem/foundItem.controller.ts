@@ -19,7 +19,7 @@ const createFoundItem = catchAsync(
     }
 
     // Calling service function to create found item into database
-    const result = await foundItemService.createFoundItemIntoDB(req.body, token);
+    const result = await foundItemService.createFoundItemIntoDB(req, token);
 
     // Sending response with success message and created data
     sendResponse(res, {
@@ -51,7 +51,7 @@ const getFoundItems = catchAsync(async (req, res) => {
 });
 
 // Exporting controller functions
-export const itemCategoryController = {
+export const FoundItemController = {
   createFoundItem,
   getFoundItems
 };

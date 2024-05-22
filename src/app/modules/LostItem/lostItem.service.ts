@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import prisma from "../../utils/prisma";
-import { Prisma, User } from "@prisma/client";
+import { Prisma, User, UserStatus } from "@prisma/client";
 import { TPaginationOptions } from "../../interface/interface";
 import { paginationHelpers } from "../../utils/paginationHelper";
 import AppError from "../../errors/AppError";
@@ -9,9 +9,12 @@ import { verifyToken } from "../Auth/auth.utils";
 import config from "../../config";
 import { TItem } from "./lostItem.interface";
 import { lostItemSearchableFields } from "./lostItem.constant";
+import { fileUploader } from "../../utils/fileUploader";
 
 // Function to create a found item into the database
-const createLostItemIntoDB = async (payload: TItem, token: string) => {
+const createLostItemIntoDB = async (req: any, token: string) => {
+  const { file, body: payload } = req;
+
   // Checking if the specified item category exists
   const checkExist = await prisma.itemCategory.findUnique({
     where: {
@@ -27,38 +30,48 @@ const createLostItemIntoDB = async (payload: TItem, token: string) => {
 
   // Verifying user authorization using the provided token
   const decoded = verifyToken(token, config.JWT.ACCESS_TOKEN_SECRET as string);
-  if (!decoded) {
+  if (!decoded || decoded?.status === UserStatus.INACTIVE) {
     throw new AppError(httpStatus.BAD_REQUEST, "You are unauthorized");
   }
 
   // Assigning the user ID to the payload
   payload.userId = decoded?.id;
+  let result;
+  try {
+    if (file) {
+      const image = await fileUploader.uploadToCloudinary(file);
+      if (image) {
+        payload.itemImg = image?.secure_url;
+      }
+    }
 
-  // Creating the found item in the database
-  const result = await prisma.lostItem.create({
-    data: payload,
-    select: {
-      id: true,
-      userId: true,
-      categoryId: true,
-      name: true,
-      description: true,
-      location: true,
-      createdAt: true,
-      updatedAt: true,
-      user: true,
-      category: true,
-    },
-  });
+    // Creating the found item in the database
+    result = await prisma.lostItem.create({
+      data: payload,
+      select: {
+        id: true,
+        userId: true,
+        categoryId: true,
+        name: true,
+        description: true,
+        location: true,
+        createdAt: true,
+        updatedAt: true,
+        user: true,
+        category: true,itemImg : true,
+      
+      },
+    });
+  } catch (err: any) {
+    console.log(err);
+    throw Error(err);
+  }
 
   return result;
 };
 
 // Function to get found items from the database with optional filters and pagination
-const getLostItemsfromDB = async (
-  params: any,
-  options: TPaginationOptions
-) => {
+const getLostItemsfromDB = async (params: any, options: TPaginationOptions) => {
   const { page, limit, skip } = paginationHelpers.calculatePagination(options);
   const { searchTerm, ...filterData } = params;
   const andConditions: Prisma.LostItemWhereInput[] = [];
@@ -109,8 +122,10 @@ const getLostItemsfromDB = async (
       location: true,
       user: true,
       category: true,
+      itemImg: true,
       createdAt: true,
       updatedAt: true,
+
     },
   });
 

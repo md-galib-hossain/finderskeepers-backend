@@ -3,6 +3,7 @@ import AppError from "../../errors/AppError";
 import httpStatus from "http-status";
 import { verifyToken } from "../Auth/auth.utils";
 import config from "../../config";
+import { UserStatus } from "@prisma/client";
 
 // Service function to create a new found item category into the database
 const createItemCategoryIntoDB = async (payload: any, token: string) => {
@@ -18,7 +19,7 @@ const createItemCategoryIntoDB = async (payload: any, token: string) => {
 
   // Verifying user authorization using the provided token
   const decoded = verifyToken(token, config.JWT.ACCESS_TOKEN_SECRET as string);
-  if (!decoded) {
+  if (!decoded || decoded?.status === UserStatus.INACTIVE) {
     throw new AppError(httpStatus.BAD_REQUEST, "You are unauthorized");
   }
 

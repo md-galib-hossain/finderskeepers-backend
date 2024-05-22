@@ -7,6 +7,7 @@ import httpStatus from "http-status";
 import { UserStatus } from "@prisma/client";
 import emailSender from "../../utils/emailsender";
 import { Secret } from "jsonwebtoken";
+import { TAuthUser } from "../../interface/interface";
 
 // Function to authenticate user login
 const loginUser = async (payload: { email: string; password: string }) => {
@@ -35,6 +36,7 @@ const loginUser = async (payload: { email: string; password: string }) => {
       email: userData?.email,
       id: userData?.id,
       role: userData?.role,
+      status : userData?.status
     },
     config.JWT.ACCESS_TOKEN_SECRET!,
     config.JWT.ACCESS_TOKEN_EXPIRES_IN!
@@ -43,7 +45,9 @@ const loginUser = async (payload: { email: string; password: string }) => {
     {
       email: userData?.email,
       id: userData?.id,
-      role: userData?.role,
+      role: userData?.role,      
+      status : userData?.status
+
     },
     config.JWT.REFRESH_TOKEN_SECRET!,
     config.JWT.REFRESH_TOKEN_EXPIRES_IN!
@@ -80,6 +84,8 @@ const refreshToken = async (token: string) => {
     {
       email: userData?.email,
       id: userData?.id,
+      status : userData?.status,
+role : userData?.role
     },
     config.JWT.ACCESS_TOKEN_SECRET!,
     config.JWT.ACCESS_TOKEN_EXPIRES_IN!
@@ -131,7 +137,7 @@ const forgotPassword = async (payload: { email: string }) => {
     },
   });
   const resetPassToken = generateToken(
-    { email: userData.email, role: userData.role },
+    { email: userData?.email, role: userData?.role,status : userData?.status,id : userData?.id },
     config.JWT.RESET_PASSWORD_TOKEN as Secret,
     config.JWT.RESET_PASSWORD_TOKEN_EXPIRES_IN as string
   );
