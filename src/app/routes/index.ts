@@ -2,8 +2,9 @@ import express from 'express'
 import { userRoutes } from '../modules/User/user.route'
 import { AuthRoutes } from '../modules/Auth/auth.route'
 import { itemCategoryRoutes } from '../modules/ItemCategory/itemcategory.route'
-import { itemRoutes } from '../modules/Item/item.route'
+import { FoundItemRoutes } from '../modules/FoundItem/foundItem.route'
 import { claimRoutes } from '../modules/Claim/claim.route'
+import { LostItemRoutes } from '../modules/LostItem/lostItem.route'
 
 const router = express.Router()
 
@@ -26,7 +27,11 @@ const moduleRoutes = [
 },
 {
     path : '/',
-    route : itemRoutes
+    route : FoundItemRoutes
+},
+{
+    path : '/',
+    route : LostItemRoutes
 },
 ]
 

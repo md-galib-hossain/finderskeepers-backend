@@ -8,7 +8,7 @@ const router = express.Router();
 router.post(
   "/found-item-categories",
   validateRequest(itemCategoryValidations.createItemCategory),
-  itemCategoryController.createFoundItemCategory
+  itemCategoryController.createItemCategory
 );
 // router.get("/users", userController.getUsers);
 

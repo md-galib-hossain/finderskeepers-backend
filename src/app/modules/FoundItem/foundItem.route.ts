@@ -1,7 +1,7 @@
 import express from "express";
 import validateRequest from "../../middlewares/validateRequest";
-import { itemCategoryController } from "./item.controller";
-import { itemValidations } from "./item.validation";
+import { itemCategoryController } from "./foundItem.controller";
+import { itemValidations } from "./foundItem.validation";
 
 const router = express.Router();
 
@@ -13,4 +13,4 @@ router.post(
 router.get("/found-items", itemCategoryController.getFoundItems);
 // router.get("/users", userController.getUsers);
 
-export const itemRoutes = router;
+export const FoundItemRoutes = router;

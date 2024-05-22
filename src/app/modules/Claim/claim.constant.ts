@@ -1,9 +1,9 @@
 export const itemSearchableFields: string[] = [
-  "foundItemName",
+  "name",
   "location",
   "description",
 ];
 export const itemFilterableFields: string[] = [
-  "foundItemName",
+  "name",
   "searchTerm","location"
 ];

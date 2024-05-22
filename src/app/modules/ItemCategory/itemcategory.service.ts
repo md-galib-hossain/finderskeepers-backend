@@ -5,9 +5,9 @@ import { verifyToken } from "../Auth/auth.utils";
 import config from "../../config";
 
 // Service function to create a new found item category into the database
-const createFoundItemCategoryIntoDB = async (payload: any, token: string) => {
+const createItemCategoryIntoDB = async (payload: any, token: string) => {
   // Checking if the category already exists with the same name
-  const checkExist = await prisma.foundItemCategory.findUnique({
+  const checkExist = await prisma.itemCategory.findUnique({
     where: {
       name: payload.name,
     },
@@ -23,7 +23,7 @@ const createFoundItemCategoryIntoDB = async (payload: any, token: string) => {
   }
 
   // Creating the found item category in the database
-  const result = await prisma.foundItemCategory.create({
+  const result = await prisma.itemCategory.create({
     data: payload,
   });
 
@@ -31,6 +31,6 @@ const createFoundItemCategoryIntoDB = async (payload: any, token: string) => {
 };
 
 // Exporting the service function
-export const foundItemCategoryService = {
-  createFoundItemCategoryIntoDB,
+export const ItemCategoryService = {
+  createItemCategoryIntoDB,
 };

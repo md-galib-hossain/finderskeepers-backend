@@ -1,6 +1,6 @@
 export type TItem = {
   categoryId: string;
-  foundItemName: string;
+  name: string;
   description: string;
   location: string;
   userId: string;

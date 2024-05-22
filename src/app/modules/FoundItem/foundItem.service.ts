@@ -7,13 +7,13 @@ import AppError from "../../errors/AppError";
 import httpStatus from "http-status";
 import { verifyToken } from "../Auth/auth.utils";
 import config from "../../config";
-import { TItem } from "./item.interface";
-import { itemSearchableFields } from "./item.constant";
+import { TItem } from "./foundItem.interface";
+import { founditemSearchableFields } from './foundItem.constant'
 
 // Function to create a found item into the database
 const createFoundItemIntoDB = async (payload: TItem, token: string) => {
   // Checking if the specified item category exists
-  const checkExist = await prisma.foundItemCategory.findUnique({
+  const checkExist = await prisma.itemCategory.findUnique({
     where: {
       id: payload?.categoryId,
     },
@@ -41,7 +41,7 @@ const createFoundItemIntoDB = async (payload: TItem, token: string) => {
       id: true,
       userId: true,
       categoryId: true,
-      foundItemName: true,
+      name: true,
       description: true,
       location: true,
       createdAt: true,
@@ -66,7 +66,7 @@ const getFoundItemsfromDB = async (
   // Building search conditions
   if (params.searchTerm) {
     andConditions.push({
-      OR: itemSearchableFields.map((field) => ({
+      OR: founditemSearchableFields.map((field) => ({
         [field]: {
           contains: params.searchTerm,
           mode: "insensitive",
@@ -104,7 +104,7 @@ const getFoundItemsfromDB = async (
           },
     select: {
       id: true,
-      foundItemName: true,
+      name: true,
       description: true,
       location: true,
       user: true,

@@ -5,8 +5,8 @@ const createItem = z.object({
     categoryId: z.string({
       required_error: "categoryId field is required",
     }),
-    foundItemName: z.string({
-      required_error: "foundItemName field is required",
+    name: z.string({
+      required_error: "name field is required",
     }),
     description: z.string({
       required_error: "description field is required",

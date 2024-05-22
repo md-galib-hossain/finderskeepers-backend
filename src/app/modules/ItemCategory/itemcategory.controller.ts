@@ -2,11 +2,11 @@ import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { foundItemCategoryService } from "./itemcategory.service";
 import AppError from "../../errors/AppError";
+import { ItemCategoryService } from "./itemcategory.service";
 
 // Controller function to create a new found item category
-const createFoundItemCategory = catchAsync(
+const createItemCategory = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // Extracting authorization token from request headers
     const token = req.headers.authorization;
@@ -17,7 +17,7 @@ const createFoundItemCategory = catchAsync(
     }
 
     // Calling service function to create found item category into database
-    const result = await foundItemCategoryService.createFoundItemCategoryIntoDB(req.body, token);
+    const result = await ItemCategoryService.createItemCategoryIntoDB(req.body, token);
 
     // Sending response with success message and created data
     sendResponse(res, {
@@ -31,5 +31,5 @@ const createFoundItemCategory = catchAsync(
 
 // Exporting the controller functions
 export const itemCategoryController = {
-  createFoundItemCategory,
+  createItemCategory,
 };
