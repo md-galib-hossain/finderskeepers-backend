@@ -12,3 +12,89 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id        String       @id @default(uuid())
+  name      String
+  email     String       @unique
+  password  String
+  role      Role         @default(USER)
+  status    UserStatus   @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  profile   UserProfile?
+  foundItem FoundItem[]
+  claim     Claim?
+
+  @@map("users")
+}
+
+model UserProfile {
+  id        String   @id @default(uuid())
+  bio       String
+  age       Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("userprofiles")
+}
+
+model FoundItemCategory {
+  id        String      @id @default(uuid())
+  name      String      @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  foundItem FoundItem[]
+
+  @@map("founditemcategories")
+}
+
+model FoundItem {
+  id            String            @id @default(uuid())
+  userId        String
+  categoryId    String
+  foundItemName String
+  description   String
+  location      String
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  user          User              @relation(fields: [userId], references: [id])
+  category      FoundItemCategory @relation(fields: [categoryId], references: [id])
+  claim         Claim?
+
+  @@map("founditems")
+}
+
+model Claim {
+  id                     String    @id @default(uuid())
+  userId                 String    @unique
+  status                 Status    @default(PENDING)
+  foundItemId            String    @unique
+  distinguishingFeatures String
+  lostDate               DateTime
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  user                   User      @relation(fields: [userId], references: [id])
+  founditem              FoundItem @relation(fields: [foundItemId], references: [id])
+
+  @@map("claims")
+}
+
+enum Status {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPERADMIN
+}
