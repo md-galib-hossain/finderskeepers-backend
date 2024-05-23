@@ -49,7 +49,7 @@ const createClaimIntoDB = async (payload: TClaim, token: string) => {
       createdAt: true,
       updatedAt: true,
       lostItem: true,
-      founditem: true,
+      foundItem: true,
 
     },
   });
@@ -99,17 +99,22 @@ const getClaimsfromDB = async (
   const andConditions: Prisma.ClaimWhereInput[] = [];
 
   // Building search conditions
-  if (params.searchTerm) {
-    andConditions.push({
-      OR: claimSearchableFields.map((field) => ({
-        [field]: {
-          contains: params.searchTerm,
-          mode: "insensitive",
-        },
-      })),
-    });
-  }
+  if (searchTerm) {
+    const searchConditions: Prisma.ClaimWhereInput = {
+      OR: [
+        { distinguishingFeatures: { contains: searchTerm, mode: 'insensitive' } },
+        { lostItem: { description: { contains: searchTerm, mode: 'insensitive' } } },
+        { foundItem: { description: { contains: searchTerm, mode: 'insensitive' } } },
+        { foundItem: { contactNo: { contains: searchTerm, mode: 'insensitive' } } },
+        { lostItem: { contactNo: { contains: searchTerm, mode: 'insensitive' } } },
+        { user: { email: { contains: searchTerm, mode: 'insensitive' } } },
+        { user: { name: { contains: searchTerm, mode: 'insensitive' } } },
+        { foundItem: { category: { name: { contains: searchTerm, mode: 'insensitive' } } } }
+      ],
+    };
 
+    andConditions.push(searchConditions);
+  }
   // Building filter conditions
   if (Object.keys(filterData).length > 0) {
     andConditions.push({
@@ -123,6 +128,7 @@ const getClaimsfromDB = async (
 
   const whereConditions: Prisma.ClaimWhereInput =
     andConditions.length > 0 ? { AND: andConditions } : {};
+
 
   // Fetching found items from the database
   const result = await prisma.claim.findMany({
@@ -147,7 +153,7 @@ const getClaimsfromDB = async (
       user: true,
       isDeleted: true,
       createdAt: true,
-      founditem: true,
+      foundItem: true,
       lostItem: true,
 
       updatedAt: true,
