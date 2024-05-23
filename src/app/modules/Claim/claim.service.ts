@@ -5,7 +5,7 @@ import { verifyToken } from "../Auth/auth.utils";
 import config from "../../config";
 import { TClaim } from "./claim.interface";
 import { Prisma, UserStatus } from "@prisma/client";
-import { TPaginationOptions } from "../../interface/interface";
+import { TAuthUser, TPaginationOptions } from "../../interface/interface";
 import { paginationHelpers } from "../../utils/paginationHelper";
 import { claimSearchableFields } from "./claim.constant";
 
@@ -176,9 +176,54 @@ const getClaimsfromDB = async (
 };
 
 
+const getMyClaimsFromDB = async (
+  user: TAuthUser,
+  options: TPaginationOptions
+) => {
+  const { limit, page, skip } = paginationHelpers.calculatePagination(options);
+console.log(user)
+  const result = await prisma.claim.findMany({
+    where: {
+      userId: user?.id
+    },
+    skip,
+    take: limit,
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? { [options.sortBy]: options.sortOrder }
+        : { createdAt: "desc" },
+    include: {
+      user: true,
+      foundItem: {
+        include: {
+          user: true, 
+        },
+      },
+      lostItem: true,
+    },
+  });
+
+  const total = await prisma.claim.count({
+    where: {
+ 
+        userId: user?.id
+     
+      },
+  })
+  return {
+    meta : {
+        total,
+        page,
+        limit
+    },
+    data : result
+  };
+};
+
+
 // Exporting the service functions
 export const claimService = {
   createClaimIntoDB,
   getClaimsfromDB,
-  updateClaimIntoDB,
+  updateClaimIntoDB,getMyClaimsFromDB
 };

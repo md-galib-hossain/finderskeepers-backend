@@ -6,6 +6,7 @@ import sendResponse from "../../utils/sendResponse";
 import AppError from "../../errors/AppError";
 import { LostItemServices } from "./lostItem.service";
 import { lostItemFilterableFields } from "./lostItem.constant";
+import { TAuthUser } from "../../interface/interface";
 
 // Controller function to create a new found item
 const createLostItem = catchAsync(
@@ -50,8 +51,28 @@ const getLostItems = catchAsync(async (req, res) => {
   });
 });
 
+
+const getMyLostItems = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+    const user = req.user;
+    const result = await LostItemServices.getMyLostItemsFromDB(
+      user as TAuthUser,
+      options
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: " My Lost Items retrieved successfully!",
+      meta: result.meta,
+      data: result.data,
+    });
+  }
+);
+
 // Exporting controller functions
 export const LostItemController = {
   createLostItem,
-  getLostItems
+  getLostItems,getMyLostItems
 };

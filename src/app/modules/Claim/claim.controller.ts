@@ -6,6 +6,7 @@ import AppError from "../../errors/AppError";
 import { claimService } from "./claim.service";
 import { claimFilterableFields } from "./claim.constant";
 import pick from "../../utils/pick";
+import { TAuthUser } from "../../interface/interface";
 
 // Controller function to create a new claim
 const createClaim = catchAsync(
@@ -70,9 +71,29 @@ const updateClaim = catchAsync(async (req, res) => {
   });
 });
 
+
+const getMyClaims = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+    const user = req.user;
+    const result = await claimService.getMyClaimsFromDB(
+      user as TAuthUser,
+      options
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Claims retrieved successfully!",
+      meta: result.meta,
+      data: result.data,
+    });
+  }
+);
+
 // Exporting the controller functions
 export const claimController = {
   createClaim,
   getClaims,
-  updateClaim
+  updateClaim,getMyClaims
 };

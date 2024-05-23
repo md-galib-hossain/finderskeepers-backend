@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import prisma from "../../utils/prisma";
 import { Prisma, User, UserStatus } from "@prisma/client";
-import { TPaginationOptions } from "../../interface/interface";
+import { TAuthUser, TPaginationOptions } from "../../interface/interface";
 import { paginationHelpers } from "../../utils/paginationHelper";
 import AppError from "../../errors/AppError";
 import httpStatus from "http-status";
@@ -161,7 +161,47 @@ const getSingleFoundItem = async (id: string) => {
   return result;
 };
 
+const getMyFoundItemsFromDB = async (
+  user: TAuthUser,
+  options: TPaginationOptions
+) => {
+  const { limit, page, skip } = paginationHelpers.calculatePagination(options);
+console.log({user})
+  const result = await prisma.foundItem.findMany({
+    where: {
+      userId: user?.id
+    },
+    skip,
+    take: limit,
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? { [options.sortBy]: options.sortOrder }
+        : { createdAt: "desc" },
+    include: {
+     
+      category: true,
+     claim: true
+    },
+  });
+
+  const total = await prisma.foundItem.count({
+    where: {
+ 
+        userId: user?.id
+     
+      },
+  })
+  return {
+    meta : {
+        total,
+        page,
+        limit
+    },
+    data : result
+  };
+};
+
 export const foundItemService = {
   createFoundItemIntoDB,
-  getFoundItemsfromDB,
+  getFoundItemsfromDB,getSingleFoundItem,getMyFoundItemsFromDB
 };
