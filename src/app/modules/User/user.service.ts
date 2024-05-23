@@ -9,6 +9,7 @@ import AppError from "../../errors/AppError";
 import httpStatus from "http-status";
 import { verifyToken } from "../Auth/auth.utils";
 import config from "../../config";
+import { generateUniqueUserName } from "./user.utils";
 
 const createUserIntoDB = async (payload: TUser) => {
   const { profile, ...userData } = payload;
@@ -26,7 +27,13 @@ const createUserIntoDB = async (payload: TUser) => {
 
   //using transaction fo creating user & user profile both at once
   const result = await prisma.$transaction(async (transactionClient) => {
+    const generatedUserName = await generateUniqueUserName({
+      userName: payload.name,
+      email: payload.email,
+    });
     userData.password = hashedPassword;
+    userData.userName = generatedUserName;
+    console.log(userData)
     const createdUserData = await transactionClient.user.create({
       data: userData,
     });
@@ -51,7 +58,7 @@ const createUserIntoDB = async (payload: TUser) => {
         createdAt: true,
         updatedAt: true,
         profile: true,
-    
+    userName : true
       },
     });
   }

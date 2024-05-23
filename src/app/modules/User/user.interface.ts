@@ -9,4 +9,5 @@ export type TUser = {
     email: string;
     password: string;
     profile: TUserProfile;
+    userName: string;
 }

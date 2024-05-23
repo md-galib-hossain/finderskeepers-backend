@@ -7,6 +7,7 @@ export const claimSearchableFields: string[] = [
   "lostItem.contactNo",
   "user.email",
   "user.name",
+  "user.userName",
  
 
 
