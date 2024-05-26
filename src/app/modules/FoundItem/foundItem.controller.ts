@@ -20,7 +20,7 @@ const createFoundItem = catchAsync(
     }
 
     // Calling service function to create found item into database
-    const result = await foundItemService.createFoundItemIntoDB(req, token);
+    const result = await foundItemService.createFoundItemIntoDB(req.body, token);
 
     // Sending response with success message and created data
     sendResponse(res, {

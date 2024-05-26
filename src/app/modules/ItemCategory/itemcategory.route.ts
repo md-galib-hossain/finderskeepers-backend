@@ -6,10 +6,10 @@ import { itemCategoryController } from "./itemcategory.controller";
 const router = express.Router();
 
 router.post(
-  "/found-item-categories",
+  "/item-categories",
   validateRequest(itemCategoryValidations.createItemCategory),
   itemCategoryController.createItemCategory
 );
-// router.get("/users", userController.getUsers);
+router.get("/item-categories", itemCategoryController.getCategories);
 
 export const itemCategoryRoutes = router;

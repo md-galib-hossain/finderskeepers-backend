@@ -10,6 +10,7 @@ import AppError from "../../errors/AppError";
 // Controller function to handle user registration
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+
     const result = await userService.createUserIntoDB(req.body);
     sendResponse(res, {
       statusCode: 201,

@@ -33,7 +33,6 @@ const createUserIntoDB = async (payload: TUser) => {
     });
     userData.password = hashedPassword;
     userData.userName = generatedUserName;
-    console.log(userData)
     const createdUserData = await transactionClient.user.create({
       data: userData,
     });
@@ -156,6 +155,7 @@ const getMyProfilefromDB = async (token: string) => {
     },
     select: {
       id: true,
+   
       userId: true,
       bio: true,
       age: true,
@@ -190,6 +190,7 @@ const updateMyProfileIntoDB = async (
       id: true,
       userId: true,
       bio: true,
+     
       age: true,
       createdAt: true,
       updatedAt: true,

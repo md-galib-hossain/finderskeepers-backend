@@ -23,7 +23,24 @@ const createItemCategory = catchAsync(
     sendResponse(res, {
       statusCode: 201,
       success: true,
-      message: "Found item category created successfully",
+      message: "Item category created successfully",
+      data: result,
+    });
+  }
+);
+
+const getCategories = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+  
+
+    // Calling service function to get found item categoies from database
+    const result = await ItemCategoryService.getCategoriesFromDB();
+
+    // Sending response with success message and get data
+    sendResponse(res, {
+      statusCode: 201,
+      success: true,
+      message: "Item category retrieved successfully",
       data: result,
     });
   }
@@ -31,5 +48,5 @@ const createItemCategory = catchAsync(
 
 // Exporting the controller functions
 export const itemCategoryController = {
-  createItemCategory,
+  createItemCategory,getCategories
 };

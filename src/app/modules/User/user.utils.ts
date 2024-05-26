@@ -1,5 +1,6 @@
 import prisma from "../../utils/prisma";
 
+
 //*utility function for get current year last two digit
 const getCurrentYearLastTwoDigits = () => {
   // Get the current year
@@ -52,7 +53,8 @@ export async function generateUniqueUserName(payload: { userName?: string; email
 
   // Check if the base name already exists
   let userName = baseName;
-  if (await prisma.user.findFirst({ where : {userName :userName} })) {
+
+  if (await prisma.user.findFirst({ where : {name :userName} })) {
     userName = await generateUniqueUserNameWithSuffix(baseName);
   }
 

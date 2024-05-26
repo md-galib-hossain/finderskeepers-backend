@@ -12,8 +12,8 @@ import { founditemSearchableFields } from './foundItem.constant'
 import { fileUploader } from "../../utils/fileUploader";
 
 // Function to create a found item into the database
-const createFoundItemIntoDB = async (req: any, token: string) => {
-  const { file, body: payload } = req;
+const createFoundItemIntoDB = async (payload: any, token: string) => {
+ 
 
   // Checking if the specified item category exists
   const checkExist = await prisma.itemCategory.findUnique({
@@ -40,12 +40,12 @@ const createFoundItemIntoDB = async (req: any, token: string) => {
 
   let result
   try{
-    if (file) {
-      const image = await fileUploader.uploadToCloudinary(file);
-      if (image) {
-        payload.itemImg = image?.secure_url;
-      }
-    }
+    // if (file) {
+    //   const image = await fileUploader.uploadToCloudinary(file);
+    //   if (image) {
+    //     payload.itemImg = image?.secure_url;
+    //   }
+    // }
 
      // Creating the found item in the database
    result = await prisma.foundItem.create({
@@ -166,7 +166,6 @@ const getMyFoundItemsFromDB = async (
   options: TPaginationOptions
 ) => {
   const { limit, page, skip } = paginationHelpers.calculatePagination(options);
-console.log({user})
   const result = await prisma.foundItem.findMany({
     where: {
       userId: user?.id

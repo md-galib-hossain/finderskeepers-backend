@@ -12,8 +12,7 @@ import { lostItemSearchableFields } from "./lostItem.constant";
 import { fileUploader } from "../../utils/fileUploader";
 
 // Function to create a found item into the database
-const createLostItemIntoDB = async (req: any, token: string) => {
-  const { file, body: payload } = req;
+const createLostItemIntoDB = async (payload: any, token: string) => {
 
   // Checking if the specified item category exists
   const checkExist = await prisma.itemCategory.findUnique({
@@ -38,12 +37,12 @@ const createLostItemIntoDB = async (req: any, token: string) => {
   payload.userId = decoded?.id;
   let result;
   try {
-    if (file) {
-      const image = await fileUploader.uploadToCloudinary(file);
-      if (image) {
-        payload.itemImg = image?.secure_url;
-      }
-    }
+    // if (file) {
+    //   const image = await fileUploader.uploadToCloudinary(file);
+    //   if (image) {
+    //     payload.itemImg = image?.secure_url;
+    //   }
+    // }
 
     // Creating the found item in the database
     result = await prisma.lostItem.create({
@@ -150,10 +149,10 @@ const getMyLostItemsFromDB = async (
   options: TPaginationOptions
 ) => {
   const { limit, page, skip } = paginationHelpers.calculatePagination(options);
-console.log({user})
   const result = await prisma.lostItem.findMany({
     where: {
-      userId: user?.id
+      userId: user?.id,
+      isDeleted : false
     },
     skip,
     take: limit,
@@ -185,7 +184,56 @@ console.log({user})
   };
 };
 
+
+
+const softDeleteMyLostItem = async (user: TAuthUser, id: string, 
+) => {
+  
+  const result = await prisma.$transaction(async (tx) => {
+    // delete claim
+     await tx.claim.updateMany({
+    where: {
+      userId: user?.id,
+      lostItemId: id,
+      isDeleted : false
+    },
+    data: {
+      isDeleted: true,
+    },
+  });
+
+    // delete lostItem
+    const deletedLostitem = await tx.lostItem.update({
+      where: {
+        id: id,
+        userId: user?.id,
+      },
+      data: {
+        isDeleted: true,
+      },
+    });
+
+   
+
+    return deletedLostitem;
+  });
+
+  return result;
+};
+
+const markAsFoundMyLostItemIntoDB = async(user :TAuthUser,id:string)=>{
+const result = await prisma.lostItem.update({where: {
+  id: id,
+  userId: user?.id,
+},
+data: {
+  lostItemStatus: "FOUND",
+},})
+return result
+}
+
+
 export const LostItemServices = {
   createLostItemIntoDB,
-  getLostItemsfromDB,getMyLostItemsFromDB
+  getLostItemsfromDB,getMyLostItemsFromDB,softDeleteMyLostItem,markAsFoundMyLostItemIntoDB
 };

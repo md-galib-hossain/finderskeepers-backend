@@ -9,17 +9,16 @@ import { UserRole } from "@prisma/client";
 const router = express.Router();
 
 
+
+
 router.post(
   "/lost-items",
-  fileUploader.upload.single("file"),
-  (req: Request, res: Response, next: NextFunction) => {
-    req.body = LostItemValidations.createItem.parse(
-      JSON.parse(req.body.data)
-    );
-    return LostItemController.createLostItem(req, res, next);
-  }
+  validateRequest(LostItemValidations.createItem),
+  LostItemController.createLostItem
 );
 router.get("/lost-items", LostItemController.getLostItems);
+router.delete("/lost-items/:id", LostItemController.softDeleteMyLostItem);
+router.patch("/lost-items/:id", LostItemController.markAsFoundMyLostItem);
 router.get('/my-lostitems',
 auth(UserRole.USER),
 LostItemController.getMyLostItems)

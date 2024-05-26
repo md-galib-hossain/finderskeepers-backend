@@ -8,15 +8,12 @@ import { UserRole } from "@prisma/client";
 
 const router = express.Router();
 
+
+
 router.post(
   "/found-items",
-  fileUploader.upload.single("file"),
-  (req: Request, res: Response, next: NextFunction) => {
-    req.body = FoundItemValidations.createItem.parse(
-      JSON.parse(req.body.data)
-    );
-    return FoundItemController.createFoundItem(req, res, next);
-  }
+  validateRequest(FoundItemValidations.createItem),
+  FoundItemController.createFoundItem
 );
 router.get("/found-items", FoundItemController.getFoundItems);
 router.get('/my-founditems',

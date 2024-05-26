@@ -109,6 +109,7 @@ const getClaimsfromDB = async (
         { lostItem: { contactNo: { contains: searchTerm, mode: 'insensitive' } } },
         { user: { email: { contains: searchTerm, mode: 'insensitive' } } },
         { user: { name: { contains: searchTerm, mode: 'insensitive' } } },
+        { user: { userName: { contains: searchTerm, mode: 'insensitive' } } },
         { foundItem: { category: { name: { contains: searchTerm, mode: 'insensitive' } } } }
       ],
     };
@@ -181,7 +182,6 @@ const getMyClaimsFromDB = async (
   options: TPaginationOptions
 ) => {
   const { limit, page, skip } = paginationHelpers.calculatePagination(options);
-console.log(user)
   const result = await prisma.claim.findMany({
     where: {
       userId: user?.id

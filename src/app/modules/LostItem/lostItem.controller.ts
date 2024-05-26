@@ -18,9 +18,9 @@ const createLostItem = catchAsync(
     if (!token) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Authentication token not found!');
     }
-
+console.log(req.body)
     // Calling service function to create found item into database
-    const result = await LostItemServices.createLostItemIntoDB(req, token);
+    const result = await LostItemServices.createLostItemIntoDB(req.body, token);
 
     // Sending response with success message and created data
     sendResponse(res, {
@@ -71,8 +71,45 @@ const getMyLostItems = catchAsync(
   }
 );
 
+const softDeleteMyLostItem = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const {id} = req.params
+    const user = req.user;
+    const result = await LostItemServices.softDeleteMyLostItem(
+      user as TAuthUser,
+      id
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: " My Lost Item is deleted successfully!",
+     
+      data: result,
+    });
+  }
+);
+const markAsFoundMyLostItem = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const {id} = req.params
+    const user = req.user;
+    const result = await LostItemServices.markAsFoundMyLostItemIntoDB(
+      user as TAuthUser,
+      id
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: " Marked as found successfully!",
+     
+      data: result,
+    });
+  }
+);
+
 // Exporting controller functions
 export const LostItemController = {
   createLostItem,
-  getLostItems,getMyLostItems
+  getLostItems,getMyLostItems,softDeleteMyLostItem,markAsFoundMyLostItem
 };

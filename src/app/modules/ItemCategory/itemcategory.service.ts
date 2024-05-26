@@ -31,7 +31,12 @@ const createItemCategoryIntoDB = async (payload: any, token: string) => {
   return result;
 };
 
+const getCategoriesFromDB = async()=>{
+  const result = await prisma.itemCategory.findMany()
+  return result
+}
+
 // Exporting the service function
 export const ItemCategoryService = {
-  createItemCategoryIntoDB,
+  createItemCategoryIntoDB,getCategoriesFromDB
 };

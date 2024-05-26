@@ -14,20 +14,21 @@ datasource db {
 }
 
 model User {
-  id         String       @id @default(uuid())
-  name       String
-  userName   String       @unique
-  email      String       @unique
-  password   String
-  isDeleted  Boolean      @default(false)
-  role       UserRole     @default(USER)
-  status     UserStatus   @default(ACTIVE)
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  profile    UserProfile?
-  foundItems FoundItem[]
-  claims     Claim[]
-  lostItems  LostItem[]
+  id           String       @id @default(uuid())
+  name         String
+  userName     String       @unique
+  email        String       @unique
+  profilePhoto String @default("https://ionicframework.com/docs/img/demos/avatar.svg")
+  password     String
+  isDeleted    Boolean      @default(false)
+  role         UserRole     @default(USER)
+  status       UserStatus   @default(ACTIVE)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  profile      UserProfile?
+  foundItems   FoundItem[]
+  claims       Claim[]
+  lostItems    LostItem[]
 
   @@map("users")
 }
