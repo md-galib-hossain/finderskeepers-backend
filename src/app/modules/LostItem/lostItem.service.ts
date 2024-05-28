@@ -13,7 +13,6 @@ import { fileUploader } from "../../utils/fileUploader";
 
 // Function to create a found item into the database
 const createLostItemIntoDB = async (payload: any, token: string) => {
-
   // Checking if the specified item category exists
   const checkExist = await prisma.itemCategory.findUnique({
     where: {
@@ -57,8 +56,8 @@ const createLostItemIntoDB = async (payload: any, token: string) => {
         createdAt: true,
         updatedAt: true,
         user: true,
-        category: true,itemImg : true,
-      
+        category: true,
+        itemImg: true,
       },
     });
   } catch (err: any) {
@@ -124,7 +123,6 @@ const getLostItemsfromDB = async (params: any, options: TPaginationOptions) => {
       itemImg: true,
       createdAt: true,
       updatedAt: true,
-
     },
   });
 
@@ -143,7 +141,6 @@ const getLostItemsfromDB = async (params: any, options: TPaginationOptions) => {
   };
 };
 
-
 const getMyLostItemsFromDB = async (
   user: TAuthUser,
   options: TPaginationOptions
@@ -152,7 +149,7 @@ const getMyLostItemsFromDB = async (
   const result = await prisma.lostItem.findMany({
     where: {
       userId: user?.id,
-      isDeleted : false
+      isDeleted: false,
     },
     skip,
     take: limit,
@@ -161,46 +158,39 @@ const getMyLostItemsFromDB = async (
         ? { [options.sortBy]: options.sortOrder }
         : { createdAt: "desc" },
     include: {
-     
       category: true,
-     claim: true
+      claim: true,
     },
   });
 
   const total = await prisma.lostItem.count({
     where: {
- 
-        userId: user?.id
-     
-      },
-  })
-  return {
-    meta : {
-        total,
-        page,
-        limit
+      userId: user?.id,
     },
-    data : result
+  });
+  return {
+    meta: {
+      total,
+      page,
+      limit,
+    },
+    data: result,
   };
 };
 
-
-
-const softDeleteMyLostItem = async (user: TAuthUser, id: string, 
-) => {
-  
+const softDeleteMyLostItem = async (user: TAuthUser, id: string) => {
   const result = await prisma.$transaction(async (tx) => {
     // delete claim
-     await tx.claim.updateMany({
-    where: {
-      userId: user?.id,
-      lostItemId: id,
-      isDeleted : false
-    },
-    data: {
-      isDeleted: true,
-    },
-  });
+    await tx.claim.updateMany({
+      where: {
+        userId: user?.id,
+        lostItemId: id,
+        isDeleted: false,
+      },
+      data: {
+        isDeleted: true,
+      },
+    });
 
     // delete lostItem
     const deletedLostitem = await tx.lostItem.update({
@@ -213,27 +203,100 @@ const softDeleteMyLostItem = async (user: TAuthUser, id: string,
       },
     });
 
-   
-
     return deletedLostitem;
   });
 
   return result;
 };
 
-const markAsFoundMyLostItemIntoDB = async(user :TAuthUser,id:string)=>{
-const result = await prisma.lostItem.update({where: {
-  id: id,
-  userId: user?.id,
-},
-data: {
-  lostItemStatus: "FOUND",
-},})
-return result
-}
+const markAsFoundMyLostItemIntoDB = async (user: TAuthUser, id: string) => {
+  const result = await prisma.lostItem.update({
+    where: {
+      id: id,
+      userId: user?.id,
+      isDeleted : false
+    },
+    data: {
+      lostItemStatus: "FOUND",
+    },
+  });
+  return result;
+};
 
+const updateLostItemIntoDB = async (payload: any, user: TAuthUser) => {
+  // Verifying user authorization using the provided token
+
+  // Checking if the item exists and belongs to the user, including claims
+  const existingItem = await prisma.lostItem.findUnique({
+    where: {
+      id: payload.id,
+      userId: user?.id,
+    },
+    include: {
+      claim: true, // Include claims
+    },
+  });
+
+  if (!existingItem) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "Lost item not found or you are not authorized to update this item"
+    );
+  }
+
+  const categoryExists = await prisma.itemCategory.findUnique({
+    where: {
+      id: payload.categoryId,
+    },
+  });
+  if (!categoryExists) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "There is no category with this name"
+    );
+  }
+
+  // Checking if the item is under claim or marked as "FOUND"
+  const hasActiveClaim = existingItem.claim.some((claim) => !claim.isDeleted);
+  if (existingItem.lostItemStatus === "FOUND" || hasActiveClaim) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Cannot update item that is under claim or marked as FOUND"
+    );
+  }
+
+  // Updating the lost item in the database
+  const updatedItem = await prisma.lostItem.update({
+    where: {
+      id: payload.id,
+    },
+    data: {
+      ...payload,
+    },
+    select: {
+      id: true,
+      userId: true,
+      categoryId: true,
+      name: true,
+      description: true,
+      location: true,
+      contactNo: true,
+      itemImg: true,
+      createdAt: true,
+      updatedAt: true,
+      user: true,
+      category: true,
+    },
+  });
+
+  return updatedItem;
+};
 
 export const LostItemServices = {
   createLostItemIntoDB,
-  getLostItemsfromDB,getMyLostItemsFromDB,softDeleteMyLostItem,markAsFoundMyLostItemIntoDB
+  getLostItemsfromDB,
+  getMyLostItemsFromDB,
+  softDeleteMyLostItem,
+  markAsFoundMyLostItemIntoDB,
+  updateLostItemIntoDB,
 };

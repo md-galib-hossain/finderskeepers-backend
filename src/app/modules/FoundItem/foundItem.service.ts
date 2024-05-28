@@ -200,7 +200,92 @@ const getMyFoundItemsFromDB = async (
   };
 };
 
+
+const updateFoundItemIntoDB = async (payload: any, user: TAuthUser) => {
+  // Verifying user authorization using the provided token
+
+  // Checking if the item exists and belongs to the user, including claims
+  const existingItem = await prisma.foundItem.findUnique({
+    where: {
+      id: payload.id,
+      userId: user?.id,
+    },
+    include: {
+      claim: true, // Include claims
+    },
+  });
+
+  if (!existingItem) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "Lost item not found or you are not authorized to update this item"
+    );
+  }
+
+  const categoryExists = await prisma.itemCategory.findUnique({
+    where: {
+      id: payload.categoryId,
+    },
+  });
+  if (!categoryExists) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "There is no category with this name"
+    );
+  }
+
+  // Checking if the item is under claim or marked as "FOUND"
+  const hasActiveClaim = existingItem.claim.some((claim) => !claim.isDeleted);
+  if (existingItem.foundItemStatus === "FOUND" || hasActiveClaim) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Cannot update item that is under claim or marked as FOUND"
+    );
+  }
+
+  // Updating the lost item in the database
+  const updatedItem = await prisma.foundItem.update({
+    where: {
+      id: payload.id,
+    },
+    data: {
+      ...payload,
+    },
+    select: {
+      id: true,
+      userId: true,
+      categoryId: true,
+      name: true,
+      description: true,
+      location: true,
+      contactNo: true,
+      itemImg: true,
+      createdAt: true,
+      updatedAt: true,
+      user: true,
+      category: true,
+      claim:true
+    },
+  });
+
+  return updatedItem;
+};
+
+const markAsClaimFoundItemIntoDB = async (user: TAuthUser, id: string) => {
+  const result = await prisma.foundItem.update({
+    where: {
+      id: id,
+      userId: user?.id,
+      isDeleted : false
+    },
+    data: {
+      foundItemStatus: "FOUND",
+    },
+  });
+  return result;
+};
+
 export const foundItemService = {
   createFoundItemIntoDB,
-  getFoundItemsfromDB,getSingleFoundItem,getMyFoundItemsFromDB
+  getFoundItemsfromDB,getSingleFoundItem,getMyFoundItemsFromDB,updateFoundItemIntoDB,markAsClaimFoundItemIntoDB
 };

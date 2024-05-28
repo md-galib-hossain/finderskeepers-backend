@@ -107,9 +107,25 @@ const markAsFoundMyLostItem = catchAsync(
     });
   }
 );
+const updateLostItem = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const user = req.user;
+    const result = await LostItemServices.updateLostItemIntoDB(
+     
+      req.body, user as TAuthUser
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Lost Item updated successfully!",
+      data: result,
+    });
+  }
+);
 
 // Exporting controller functions
 export const LostItemController = {
   createLostItem,
-  getLostItems,getMyLostItems,softDeleteMyLostItem,markAsFoundMyLostItem
+  getLostItems,getMyLostItems,softDeleteMyLostItem,markAsFoundMyLostItem,updateLostItem
 };

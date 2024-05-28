@@ -9,15 +9,16 @@ const router = express.Router();
 
 router.post(
   "/claims",
+  auth(UserRole.USER),
   validateRequest(claimValidations.createClaim),
   claimController.createClaim
 );
-router.get("/claims", claimController.getClaims);
-router.get('/my-claims',
-auth(UserRole.USER),
-claimController.getMyClaims)
-router.put(
-  "/claims/:claimId",
+router.get("/claims",  auth(UserRole.ADMIN, UserRole.SUPERADMIN),
+claimController.getClaims);
+router.get("/my-claims", auth(UserRole.USER), claimController.getMyClaims);
+router.patch(
+  "/claims",
+  auth(UserRole.ADMIN, UserRole.SUPERADMIN),
   validateRequest(claimValidations.updateClaim),
   claimController.updateClaim
 );

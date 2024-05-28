@@ -51,25 +51,22 @@ const getClaims = catchAsync(async (req, res) => {
 });
 
 // Controller function to update a claim
-const updateClaim = catchAsync(async (req, res) => {
-  // Extracting claimId from request parameters
-  const { claimId } = req.params;
-  // Extracting authorization token from request headers
-  const token = req.headers.authorization;
-  // Checking if authorization token is missing
-  if (!token) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'Authentication token not found!');
+const updateClaim = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const user = req.user;
+    const result = await claimService.updateClaimIntoDB(
+     
+      req.body, user as TAuthUser
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Claim updated successfully!",
+      data: result,
+    });
   }
-  // Calling service function to update the claim in the database
-  const result = await claimService.updateClaimIntoDB(token, claimId, req.body);
-  // Sending response with success message and updated data
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "Claim updated successfully",
-    data: result,
-  });
-});
+);
 
 
 const getMyClaims = catchAsync(

@@ -70,8 +70,44 @@ const getMyFoundItems = catchAsync(
   }
 );
 
+const updateFoundItem = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const user = req.user;
+    const result = await foundItemService.updateFoundItemIntoDB(
+     
+      req.body, user as TAuthUser
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Found Item updated successfully!",
+      data: result,
+    });
+  }
+);
+
+const markAsClaimedMyFoundItem = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const {id} = req.params
+    const user = req.user;
+    const result = await foundItemService.markAsClaimFoundItemIntoDB(
+      user as TAuthUser,
+      id
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: " Marked as claimed successfully!",
+     
+      data: result,
+    });
+  }
+);
+
 // Exporting controller functions
 export const FoundItemController = {
   createFoundItem,
-  getFoundItems,getMyFoundItems
+  getFoundItems,getMyFoundItems,updateFoundItem,markAsClaimedMyFoundItem
 };

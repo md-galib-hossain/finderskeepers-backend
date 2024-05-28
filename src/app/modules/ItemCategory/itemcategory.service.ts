@@ -36,6 +36,8 @@ const getCategoriesFromDB = async()=>{
   return result
 }
 
+
+
 // Exporting the service function
 export const ItemCategoryService = {
   createItemCategoryIntoDB,getCategoriesFromDB

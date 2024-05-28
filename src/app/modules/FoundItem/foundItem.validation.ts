@@ -19,4 +19,16 @@ const createItem = z.object({
  
 });
 
-export const FoundItemValidations = { createItem };
+const updateItem = z.object({
+  body: z.object({
+   id: z.string({
+     required_error: "Lost item id field is required",
+   }),
+   categoryId: z.string().optional(),
+   name: z.string().optional(),
+   description: z.string().optional(),
+   location: z.string().optional(),
+  })
+ });
+
+export const FoundItemValidations = { createItem,updateItem };

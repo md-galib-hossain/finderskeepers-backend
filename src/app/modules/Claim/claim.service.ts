@@ -15,10 +15,10 @@ const createClaimIntoDB = async (payload: TClaim, token: string) => {
   const checkExist = await prisma.claim.findFirst({
     where: {
       foundItemId: payload?.foundItemId,
-      status : 'APPROVED'
+      status: "APPROVED",
     },
   });
-  
+
   if (checkExist) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
@@ -50,28 +50,31 @@ const createClaimIntoDB = async (payload: TClaim, token: string) => {
       updatedAt: true,
       lostItem: true,
       foundItem: true,
-
     },
   });
 
   return result;
 };
 
-
-
 // Function to update a claim in the database
-const updateClaimIntoDB = async (
-  token: string,
-  id: string,
-  payload: Partial<TClaim>
-) => {
+const updateClaimIntoDB = async (payload: any, user: TAuthUser) => {
+  const { claimData, id } = payload;
   // Checking if the claim with the specified ID exists
-  await prisma.claim.findUniqueOrThrow({ where: { id: id } });
+  const existsClaim = await prisma.claim.findUnique({
+    where: {
+      id,
 
-  // Verifying user authorization using the provided token
-  const decoded = verifyToken(token, config.JWT.ACCESS_TOKEN_SECRET as string);
-  if (!decoded || decoded?.status === UserStatus.INACTIVE) {
-    throw new AppError(httpStatus.BAD_REQUEST, "You are unauthorized");
+      // status :{
+      //   not: "REJECTED",
+      // }
+    },
+  });
+
+  if (!existsClaim || existsClaim.status === "REJECTED") {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "There is no claim with this id or already rejected this claim"
+    );
   }
 
   // Updating the claim in the database
@@ -79,21 +82,36 @@ const updateClaimIntoDB = async (
     where: {
       id,
     },
-    data: payload,
+    data: claimData,
   });
+
+  if (result.status === "APPROVED" && result.foundItemId) {
+    const foundItemResult = await prisma.foundItem.update({
+      where: {
+        id: result.foundItemId,
+      },
+      data: {
+        foundItemStatus: "FOUND",
+      },
+    });
+    return foundItemResult;
+  }
+  if (result.status === "APPROVED" && result.lostItemId) {
+    const lostItemResult = await prisma.lostItem.update({
+      where: {
+        id: result.lostItemId,
+      },
+      data: {
+        lostItemStatus: "FOUND",
+      },
+    });
+    return lostItemResult;
+  }
 
   return result;
 };
 
-
-
-
-
-const getClaimsfromDB = async (
-  params: any,
-  options: TPaginationOptions
-) => {
-  
+const getClaimsfromDB = async (params: any, options: TPaginationOptions) => {
   const { page, limit, skip } = paginationHelpers.calculatePagination(options);
   const { searchTerm, ...filterData } = params;
   const andConditions: Prisma.ClaimWhereInput[] = [];
@@ -102,15 +120,37 @@ const getClaimsfromDB = async (
   if (searchTerm) {
     const searchConditions: Prisma.ClaimWhereInput = {
       OR: [
-        { distinguishingFeatures: { contains: searchTerm, mode: 'insensitive' } },
-        { lostItem: { description: { contains: searchTerm, mode: 'insensitive' } } },
-        { foundItem: { description: { contains: searchTerm, mode: 'insensitive' } } },
-        { foundItem: { contactNo: { contains: searchTerm, mode: 'insensitive' } } },
-        { lostItem: { contactNo: { contains: searchTerm, mode: 'insensitive' } } },
-        { user: { email: { contains: searchTerm, mode: 'insensitive' } } },
-        { user: { name: { contains: searchTerm, mode: 'insensitive' } } },
-        { user: { userName: { contains: searchTerm, mode: 'insensitive' } } },
-        { foundItem: { category: { name: { contains: searchTerm, mode: 'insensitive' } } } }
+        {
+          distinguishingFeatures: { contains: searchTerm, mode: "insensitive" },
+        },
+        {
+          lostItem: {
+            description: { contains: searchTerm, mode: "insensitive" },
+          },
+        },
+        {
+          foundItem: {
+            description: { contains: searchTerm, mode: "insensitive" },
+          },
+        },
+        {
+          foundItem: {
+            contactNo: { contains: searchTerm, mode: "insensitive" },
+          },
+        },
+        {
+          lostItem: {
+            contactNo: { contains: searchTerm, mode: "insensitive" },
+          },
+        },
+        { user: { email: { contains: searchTerm, mode: "insensitive" } } },
+        { user: { name: { contains: searchTerm, mode: "insensitive" } } },
+        { user: { userName: { contains: searchTerm, mode: "insensitive" } } },
+        {
+          foundItem: {
+            category: { name: { contains: searchTerm, mode: "insensitive" } },
+          },
+        },
       ],
     };
 
@@ -129,7 +169,6 @@ const getClaimsfromDB = async (
 
   const whereConditions: Prisma.ClaimWhereInput =
     andConditions.length > 0 ? { AND: andConditions } : {};
-
 
   // Fetching found items from the database
   const result = await prisma.claim.findMany({
@@ -176,7 +215,6 @@ const getClaimsfromDB = async (
   };
 };
 
-
 const getMyClaimsFromDB = async (
   user: TAuthUser,
   options: TPaginationOptions
@@ -184,7 +222,7 @@ const getMyClaimsFromDB = async (
   const { limit, page, skip } = paginationHelpers.calculatePagination(options);
   const result = await prisma.claim.findMany({
     where: {
-      userId: user?.id
+      userId: user?.id,
     },
     skip,
     take: limit,
@@ -196,7 +234,7 @@ const getMyClaimsFromDB = async (
       user: true,
       foundItem: {
         include: {
-          user: true, 
+          user: true,
         },
       },
       lostItem: true,
@@ -205,25 +243,23 @@ const getMyClaimsFromDB = async (
 
   const total = await prisma.claim.count({
     where: {
- 
-        userId: user?.id
-     
-      },
-  })
-  return {
-    meta : {
-        total,
-        page,
-        limit
+      userId: user?.id,
     },
-    data : result
+  });
+  return {
+    meta: {
+      total,
+      page,
+      limit,
+    },
+    data: result,
   };
 };
-
 
 // Exporting the service functions
 export const claimService = {
   createClaimIntoDB,
   getClaimsfromDB,
-  updateClaimIntoDB,getMyClaimsFromDB
+  updateClaimIntoDB,
+  getMyClaimsFromDB,
 };
