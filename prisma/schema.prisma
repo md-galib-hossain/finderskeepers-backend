@@ -101,7 +101,7 @@ model Claim {
   id                     String    @id @default(uuid())
   userId                 String
   status                 Status    @default(PENDING)
-  foundItemId            String
+  foundItemId            String?
   lostItemId             String
   isDeleted              Boolean   @default(false)
   distinguishingFeatures String
@@ -109,7 +109,7 @@ model Claim {
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
   user                   User      @relation(fields: [userId], references: [id])
-  foundItem              FoundItem @relation(fields: [foundItemId], references: [id])
+  foundItem              FoundItem? @relation(fields: [foundItemId], references: [id])
   lostItem               LostItem  @relation(fields: [lostItemId], references: [id])
 
   @@map("claims")

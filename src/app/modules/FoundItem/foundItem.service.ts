@@ -7,9 +7,9 @@ import AppError from "../../errors/AppError";
 import httpStatus from "http-status";
 import { verifyToken } from "../Auth/auth.utils";
 import config from "../../config";
-import { TItem } from "./foundItem.interface";
+import { CombinedItem, TItem } from "./foundItem.interface";
 import { founditemSearchableFields } from './foundItem.constant'
-import { fileUploader } from "../../utils/fileUploader";
+import { lostItemSearchableFields } from "../LostItem/lostItem.constant";
 
 // Function to create a found item into the database
 const createFoundItemIntoDB = async (payload: any, token: string) => {
@@ -132,6 +132,7 @@ const getFoundItemsfromDB = async (
       category: true,
       createdAt: true,
       updatedAt: true,
+      foundItemStatus : true
     },
   });
 
@@ -284,6 +285,13 @@ const markAsClaimFoundItemIntoDB = async (user: TAuthUser, id: string) => {
   });
   return result;
 };
+
+
+
+
+
+
+
 
 export const foundItemService = {
   createFoundItemIntoDB,

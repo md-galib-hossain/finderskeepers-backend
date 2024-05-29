@@ -5,6 +5,9 @@ export const founditemSearchableFields: string[] = [
   ];
   export const founditemFilterableFields: string[] = [
     "name",
-    "searchTerm","location"
+    "searchTerm","location","category.name"
   ];
   
+
+
+

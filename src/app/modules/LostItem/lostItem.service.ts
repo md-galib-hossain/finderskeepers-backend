@@ -72,7 +72,7 @@ const createLostItemIntoDB = async (payload: any, token: string) => {
 const getLostItemsfromDB = async (params: any, options: TPaginationOptions) => {
   const { page, limit, skip } = paginationHelpers.calculatePagination(options);
   const { searchTerm, ...filterData } = params;
-  const andConditions: Prisma.LostItemWhereInput[] = [];
+  const andConditions: Prisma.LostItemWhereInput[] = [{isDeleted : false}];
 
   // Building search conditions
   if (params.searchTerm) {
@@ -123,12 +123,14 @@ const getLostItemsfromDB = async (params: any, options: TPaginationOptions) => {
       itemImg: true,
       createdAt: true,
       updatedAt: true,
+      lostItemStatus: true
     },
   });
 
   // Getting total count of found items for pagination
   const total = await prisma.lostItem.count({
     where: whereConditions,
+
   });
 
   return {

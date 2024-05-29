@@ -21,7 +21,7 @@ router.patch(
   FoundItemController.updateFoundItem
 );
 router.patch(
-  "/found-items/:id",
+  "/my-founditems/:id",
   auth(UserRole.USER),
   FoundItemController.markAsClaimedMyFoundItem
 );
