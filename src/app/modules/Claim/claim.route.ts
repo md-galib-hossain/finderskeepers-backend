@@ -16,6 +16,7 @@ router.post(
 router.get("/claims",  auth(UserRole.ADMIN, UserRole.SUPERADMIN),
 claimController.getClaims);
 router.get("/my-claims", auth(UserRole.USER), claimController.getMyClaims);
+router.get("/myfoundeditems-claims", auth(UserRole.USER), claimController.getAllClaimsForMyFoundedItems);
 router.patch(
   "/claims",
   auth(UserRole.ADMIN, UserRole.SUPERADMIN),

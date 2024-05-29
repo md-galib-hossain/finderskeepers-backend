@@ -10,6 +10,8 @@ const router = express.Router();
 
 router.post(
   "/found-items",
+  auth(UserRole.USER)
+  ,
   validateRequest(FoundItemValidations.createItem),
   FoundItemController.createFoundItem
 );

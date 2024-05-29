@@ -23,6 +23,7 @@ const auth = (...roles: string[]) => {
         config.JWT.ACCESS_TOKEN_SECRET as Secret
       );
 
+      console.log(verifiedUser)
       if(verifiedUser && await prisma.user.findUnique({where : { id : verifiedUser.id , status : UserStatus.INACTIVE}})){
         throw new AppError(httpStatus.UNAUTHORIZED, "you are unauthorized");
 

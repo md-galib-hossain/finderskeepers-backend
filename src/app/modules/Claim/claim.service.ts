@@ -50,6 +50,7 @@ const createClaimIntoDB = async (payload: TClaim, token: string) => {
       updatedAt: true,
       lostItem: true,
       foundItem: true,
+      
     },
   });
 
@@ -255,11 +256,55 @@ const getMyClaimsFromDB = async (
     data: result,
   };
 };
+const getAllClaimsForMyFoundedItemsFromDB = async (
+  user: TAuthUser,
+  options: TPaginationOptions
+) => {
+  const { limit, page, skip } = paginationHelpers.calculatePagination(options);
+  const result = await prisma.claim.findMany({
+    where: {
+      foundItem : {
+        userId : user?.id
+      }
+    },
+    skip,
+    take: limit,
+    orderBy:
+      options.sortBy && options.sortOrder
+        ? { [options.sortBy]: options.sortOrder }
+        : { createdAt: "desc" },
+    include: {
+      user: true,
+      foundItem: {
+        include: {
+          user: true,
+        },
+      },
+      lostItem: true,
+    },
+  });
+
+  const total = await prisma.claim.count({
+    where: {
+      foundItem : {
+        userId : user?.id
+      }
+    },
+  });
+  return {
+    meta: {
+      total,
+      page,
+      limit,
+    },
+    data: result,
+  };
+};
 
 // Exporting the service functions
 export const claimService = {
   createClaimIntoDB,
   getClaimsfromDB,
   updateClaimIntoDB,
-  getMyClaimsFromDB,
+  getMyClaimsFromDB,getAllClaimsForMyFoundedItemsFromDB
 };
