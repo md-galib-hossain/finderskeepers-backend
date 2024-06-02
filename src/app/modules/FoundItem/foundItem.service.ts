@@ -7,7 +7,7 @@ import AppError from "../../errors/AppError";
 import httpStatus from "http-status";
 import { verifyToken } from "../Auth/auth.utils";
 import config from "../../config";
-import { founditemSearchableFields } from './foundItem.constant'
+import { foundItemSearchableFields } from "./foundItem.constant";
 
 // Function to create a found item into the database
 const createFoundItemIntoDB = async (payload: any, token: string) => {
@@ -85,7 +85,7 @@ const getFoundItemsfromDB = async (
   // Building search conditions
   if (params.searchTerm) {
     andConditions.push({
-      OR: founditemSearchableFields.map((field) => ({
+      OR: foundItemSearchableFields.map((field : any) => ({
         [field]: {
           contains: params.searchTerm,
           mode: "insensitive",
@@ -94,16 +94,29 @@ const getFoundItemsfromDB = async (
     });
   }
 
-  // Building filter conditions
-  if (Object.keys(filterData).length > 0) {
-    andConditions.push({
-      AND: Object.keys(filterData).map((key) => ({
-        [key]: {
-          equals: (filterData as any)[key],
-        },
-      })),
-    });
-  }
+    // Building filter conditions
+    if (Object.keys(filterData).length > 0) {
+      Object.keys(filterData).forEach((key) => {
+        if (filterData.category) {
+        
+          // Handle nested field category.name
+          andConditions.push({
+            category: {
+              name: {
+                equals: filterData.category.name,
+              },
+            },
+          });
+        } else {
+          
+          andConditions.push({
+            [key]: {
+              equals: filterData[key],
+            },
+          });
+        }
+      });
+    }
 
   const whereConditions: Prisma.FoundItemWhereInput =
     andConditions.length > 0 ? { AND: andConditions } : {};
@@ -130,7 +143,9 @@ const getFoundItemsfromDB = async (
       category: true,
       createdAt: true,
       updatedAt: true,
-      foundItemStatus : true,claim: true
+      foundItemStatus : true,claim: true,
+      itemImg : true,
+      contactNo : true
     },
   });
 
@@ -217,20 +232,22 @@ const updateFoundItemIntoDB = async (payload: any, user: TAuthUser) => {
   if (!existingItem) {
     throw new AppError(
       httpStatus.NOT_FOUND,
-      "Lost item not found or you are not authorized to update this item"
+      "Found item not found or you are not authorized to update this item"
     );
   }
 
-  const categoryExists = await prisma.itemCategory.findUnique({
-    where: {
-      id: payload.categoryId,
-    },
-  });
-  if (!categoryExists) {
-    throw new AppError(
-      httpStatus.NOT_FOUND,
-      "There is no category with this name"
-    );
+  if(payload?.categoryId){
+    const categoryExists = await prisma.itemCategory.findUnique({
+      where: {
+        id: payload.categoryId,
+      },
+    });
+    if (!categoryExists) {
+      throw new AppError(
+        httpStatus.NOT_FOUND,
+        "There is no category with this name"
+      );
+    }
   }
 
   // Checking if the item is under claim or marked as "FOUND"

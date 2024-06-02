@@ -22,7 +22,7 @@ const createItem = z.object({
 const updateItem = z.object({
   body: z.object({
    id: z.string({
-     required_error: "Lost item id field is required",
+     required_error: "Found item id field is required",
    }),
    categoryId: z.string().optional(),
    name: z.string().optional(),

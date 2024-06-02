@@ -12,7 +12,9 @@ router.post(
   userController.createUser
 );
 router.get("/users",auth(UserRole.ADMIN,UserRole.SUPERADMIN), userController.getUsers);
+router.get("/users/:id",auth(UserRole.ADMIN,UserRole.SUPERADMIN), userController.getSingleUser);
+router.patch("/users/:id",auth(UserRole.ADMIN,UserRole.SUPERADMIN), userController.updateUserStatus);
 router.get("/my-profile", userController.getMyProfile);
-router.put("/my-profile",validateRequest(userValidations.updateUserProfile), userController.updateMyProfile);
+router.patch("/my-profile",validateRequest(userValidations.updateUserProfile), userController.updateMyProfile);
 
 export const userRoutes = router;

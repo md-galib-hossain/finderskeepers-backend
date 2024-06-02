@@ -50,7 +50,6 @@ const createClaimIntoDB = async (payload: TClaim, token: string) => {
       updatedAt: true,
       lostItem: true,
       foundItem: true,
-      
     },
   });
 
@@ -108,6 +107,64 @@ const updateClaimIntoDB = async (payload: any, user: TAuthUser) => {
     });
     return lostItemResult;
   }
+
+  return result;
+};
+// Function to update my claim in the database
+const updateMyClaimIntoDB = async (payload: any, user: TAuthUser) => {
+  const { id, ...claimData } = payload;
+
+  console.log({ claimData, id });
+  // Checking if the claim with the specified ID exists
+  const existsClaim = await prisma.claim.findUnique({
+    where: {
+      id,
+      userId: user?.id,
+
+      // status :{
+      //   notIn: ["REJECTED", "APPROVED"],
+
+      // }
+    },
+  });
+
+  if (!existsClaim) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "There is no pending claim with this id"
+    );
+  }
+
+  // Updating the claim in the database
+  const result = await prisma.claim.update({
+    where: {
+      id,
+    },
+    data: claimData,
+  });
+
+  // if (result.status === "APPROVED" && result.foundItemId) {
+  //   const foundItemResult = await prisma.foundItem.update({
+  //     where: {
+  //       id: result.foundItemId,
+  //     },
+  //     data: {
+  //       foundItemStatus: "FOUND",
+  //     },
+  //   });
+  //   return foundItemResult;
+  // }
+  // if (result.status === "APPROVED" && result.lostItemId) {
+  //   const lostItemResult = await prisma.lostItem.update({
+  //     where: {
+  //       id: result.lostItemId,
+  //     },
+  //     data: {
+  //       lostItemStatus: "FOUND",
+  //     },
+  //   });
+  //   return lostItemResult;
+  // }
 
   return result;
 };
@@ -236,6 +293,7 @@ const getMyClaimsFromDB = async (
       foundItem: {
         include: {
           user: true,
+          category: true,
         },
       },
       lostItem: true,
@@ -263,9 +321,9 @@ const getAllClaimsForMyFoundedItemsFromDB = async (
   const { limit, page, skip } = paginationHelpers.calculatePagination(options);
   const result = await prisma.claim.findMany({
     where: {
-      foundItem : {
-        userId : user?.id
-      }
+      foundItem: {
+        userId: user?.id,
+      },
     },
     skip,
     take: limit,
@@ -278,6 +336,7 @@ const getAllClaimsForMyFoundedItemsFromDB = async (
       foundItem: {
         include: {
           user: true,
+          category: true,
         },
       },
       lostItem: true,
@@ -286,9 +345,9 @@ const getAllClaimsForMyFoundedItemsFromDB = async (
 
   const total = await prisma.claim.count({
     where: {
-      foundItem : {
-        userId : user?.id
-      }
+      foundItem: {
+        userId: user?.id,
+      },
     },
   });
   return {
@@ -301,10 +360,82 @@ const getAllClaimsForMyFoundedItemsFromDB = async (
   };
 };
 
+const approveClaim = async (id: string, user: TAuthUser) => {
+  const result = await prisma.$transaction(async (tx) => {
+    const claimed = await tx.claim.update({
+      where: {
+        id,
+        foundItem: {
+          userId: user?.id,
+        },
+        status: "PENDING",
+        isDeleted: false,
+      },
+      data: {
+        status: "APPROVED",
+      },
+    });
+    console.log(claimed);
+
+    if (claimed?.lostItemId) {
+      const lostItem = await tx.lostItem.findUnique({
+        where: {
+          id: claimed?.lostItemId,
+        },
+      });
+
+      if (lostItem && lostItem.lostItemStatus === "NOTFOUND") {
+        await tx.lostItem.update({
+          where: {
+            id: claimed?.lostItemId,
+          },
+          data: {
+            lostItemStatus: "FOUND",
+          },
+        });
+      }
+    }
+
+    await tx.foundItem.update({
+      where: {
+        id: claimed?.foundItemId,
+        foundItemStatus: "NOTFOUND",
+      },
+      data: {
+        foundItemStatus: "FOUND",
+      },
+    });
+
+    return claimed;
+  });
+
+  return result;
+};
+
+const rejectClaim = async (id: string, user: TAuthUser) => {
+  const result = await prisma.claim.update({
+    where: {
+      id,
+      foundItem: {
+        userId: user?.id,
+      },
+      status: "PENDING",
+      isDeleted: false,
+    },
+    data: {
+      status: "REJECTED",
+    },
+  });
+
+  return result;
+};
+
 // Exporting the service functions
 export const claimService = {
   createClaimIntoDB,
   getClaimsfromDB,
   updateClaimIntoDB,
-  getMyClaimsFromDB,getAllClaimsForMyFoundedItemsFromDB
+  getMyClaimsFromDB,
+  getAllClaimsForMyFoundedItemsFromDB,
+  updateMyClaimIntoDB,approveClaim,rejectClaim
 };

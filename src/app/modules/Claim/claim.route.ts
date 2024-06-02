@@ -17,11 +17,22 @@ router.get("/claims",  auth(UserRole.ADMIN, UserRole.SUPERADMIN),
 claimController.getClaims);
 router.get("/my-claims", auth(UserRole.USER), claimController.getMyClaims);
 router.get("/myfoundeditems-claims", auth(UserRole.USER), claimController.getAllClaimsForMyFoundedItems);
+router.patch("/myfoundeditems-claims", auth(UserRole.USER), claimController.updateMyClaim);
 router.patch(
   "/claims",
   auth(UserRole.ADMIN, UserRole.SUPERADMIN),
   validateRequest(claimValidations.updateClaim),
   claimController.updateClaim
+);
+router.patch(
+  "/claims/approveclaim/:id",
+  auth(UserRole.USER),
+  claimController.approveClaim
+);
+router.patch(
+  "/claims/rejectclaim/:id",
+  auth(UserRole.USER),
+  claimController.rejectClaim
 );
 // router.get("/users", userController.getUsers);
 

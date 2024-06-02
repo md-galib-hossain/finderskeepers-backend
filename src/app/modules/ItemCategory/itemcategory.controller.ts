@@ -45,8 +45,22 @@ const getCategories = catchAsync(
     });
   }
 );
+const updateCategory = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+  
+const {id} = req.params
+    const result = await ItemCategoryService.updateCategoryIntoDb(id,req.body);
+
+    sendResponse(res, {
+      statusCode: 201,
+      success: true,
+      message: "Item category updated successfully",
+      data: result,
+    });
+  }
+);
 
 // Exporting the controller functions
 export const itemCategoryController = {
-  createItemCategory,getCategories
+  createItemCategory,getCategories,updateCategory
 };

@@ -5,6 +5,7 @@ import config from "./app/config";
 const main = async () => {
   const server: Server = app.listen(config.PORT, () => {
     console.log("Server listening on port: ", config.PORT);
+    
   });
 
   const exitHandler = () => {

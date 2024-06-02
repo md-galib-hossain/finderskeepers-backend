@@ -10,7 +10,6 @@ import AppError from "../../errors/AppError";
 // Controller function to handle user registration
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-
     const result = await userService.createUserIntoDB(req.body);
     sendResponse(res, {
       statusCode: 201,
@@ -39,7 +38,10 @@ const getUsers = catchAsync(async (req, res) => {
 const getMyProfile = catchAsync(async (req, res) => {
   const token = req.headers.authorization;
   if (!token) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'Authentication token not found!');
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Authentication token not found!"
+    );
   }
   const result = await userService.getMyProfilefromDB(token);
   sendResponse(res, {
@@ -54,7 +56,10 @@ const getMyProfile = catchAsync(async (req, res) => {
 const updateMyProfile = catchAsync(async (req, res) => {
   const token = req.headers.authorization;
   if (!token) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'Authentication token not found!');
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Authentication token not found!"
+    );
   }
   const result = await userService.updateMyProfileIntoDB(token, req.body);
   sendResponse(res, {
@@ -64,10 +69,34 @@ const updateMyProfile = catchAsync(async (req, res) => {
     data: result,
   });
 });
+// Controller function to update the current user's profile
+const updateUserStatus = catchAsync(async (req, res) => {
+const {id} = req.params
+  const result = await userService.updateUserStatus(id, req.body);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "User updated successfully",
+    data: result,
+  });
+});
+// Controller function to update the current user's profile
+const getSingleUser = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  const result = await userService.getSingleUserFromDb(id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "User profile retrived successfully",
+    data: result,
+  });
+});
 
 export const userController = {
   createUser,
   getUsers,
   getMyProfile,
   updateMyProfile,
+  getSingleUser,updateUserStatus
 };

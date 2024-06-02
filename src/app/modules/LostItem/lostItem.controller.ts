@@ -34,9 +34,15 @@ console.log(req.body)
 
 // Controller function to get found items with optional filters and pagination
 const getLostItems = catchAsync(async (req, res) => {
-  // Extracting filters and options from request query
-  const filters = pick(req.query, lostItemFilterableFields);
+  const query = {...req.query}
+  if(query.category){
+    query.category = {name : query.category}
+  }
+  
+  const filters = pick(query, lostItemFilterableFields);
+  
   const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
+  console.log({filters})
 
   // Calling service function to get found items from database
   const result = await LostItemServices.getLostItemsfromDB(filters, options);

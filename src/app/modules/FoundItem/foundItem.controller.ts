@@ -5,8 +5,8 @@ import pick from "../../utils/pick";
 import sendResponse from "../../utils/sendResponse";
 import AppError from "../../errors/AppError";
 import { foundItemService } from "./foundItem.service";
-import { founditemFilterableFields } from "./foundItem.constant";
 import { TAuthUser } from "../../interface/interface";
+import { foundItemFilterableFields } from "./foundItem.constant";
 
 // Controller function to create a new found item
 const createFoundItem = catchAsync(
@@ -34,8 +34,13 @@ const createFoundItem = catchAsync(
 
 // Controller function to get found items with optional filters and pagination
 const getFoundItems = catchAsync(async (req, res) => {
-  // Extracting filters and options from request query
-  const filters = pick(req.query, founditemFilterableFields);
+  const query = {...req.query}
+  if(query.category){
+    query.category = {name : query.category}
+  }
+  
+  const filters = pick(query, foundItemFilterableFields);
+  
   const options = pick(req.query, ["limit", "page", "sortBy", "sortOrder"]);
 
   // Calling service function to get found items from database

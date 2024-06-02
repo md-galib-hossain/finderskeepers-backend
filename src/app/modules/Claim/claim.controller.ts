@@ -67,6 +67,23 @@ const updateClaim = catchAsync(
     });
   }
 );
+// Controller function to update my claim
+const updateMyClaim = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const user = req.user;
+    const result = await claimService.updateMyClaimIntoDB(
+     
+      req.body, user as TAuthUser
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Claim updated successfully!",
+      data: result,
+    });
+  }
+);
 
 
 const getMyClaims = catchAsync(
@@ -105,10 +122,46 @@ const getAllClaimsForMyFoundedItems = catchAsync(
     });
   }
 );
+const approveClaim = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const user = req.user;
+    const {id} = req.params;
+    const result = await claimService.approveClaim(
+      id,
+      user as TAuthUser,
+      
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Claim approved successfully!",
+     data : result
+    });
+  }
+);
+const rejectClaim = catchAsync(
+  async (req: Request & { user?: TAuthUser }, res: Response) => {
+    const user = req.user;
+    const {id} = req.params;
+    const result = await claimService.rejectClaim(
+      id,
+      user as TAuthUser,
+      
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Claim rejected successfully!",
+     data : result
+    });
+  }
+);
 
 // Exporting the controller functions
 export const claimController = {
   createClaim,
   getClaims,
-  updateClaim,getMyClaims,getAllClaimsForMyFoundedItems
+  updateClaim,getMyClaims,getAllClaimsForMyFoundedItems,updateMyClaim,approveClaim,rejectClaim
 };

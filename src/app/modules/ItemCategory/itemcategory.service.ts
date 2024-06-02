@@ -4,6 +4,7 @@ import httpStatus from "http-status";
 import { verifyToken } from "../Auth/auth.utils";
 import config from "../../config";
 import { UserStatus } from "@prisma/client";
+import { TAuthUser } from "../../interface/interface";
 
 // Service function to create a new found item category into the database
 const createItemCategoryIntoDB = async (payload: any, token: string) => {
@@ -36,9 +37,18 @@ const getCategoriesFromDB = async()=>{
   return result
 }
 
+const updateCategoryIntoDb = async(id:string,payload:any)=>{
+const result = await prisma.itemCategory.update({
+  where : {
+    id : id
+  },
+  data : payload
+})
+return result
 
+}
 
 // Exporting the service function
 export const ItemCategoryService = {
-  createItemCategoryIntoDB,getCategoriesFromDB
+  createItemCategoryIntoDB,getCategoriesFromDB,updateCategoryIntoDb
 };

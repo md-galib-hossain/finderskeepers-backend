@@ -72,14 +72,14 @@ const createLostItemIntoDB = async (payload: any, token: string) => {
 const getLostItemsfromDB = async (params: any, options: TPaginationOptions) => {
   const { page, limit, skip } = paginationHelpers.calculatePagination(options);
   const { searchTerm, ...filterData } = params;
-  const andConditions: Prisma.LostItemWhereInput[] = [{isDeleted : false}];
-
+  const andConditions: Prisma.LostItemWhereInput[] = [{ isDeleted: false }];
+  
   // Building search conditions
-  if (params.searchTerm) {
+  if (searchTerm) {
     andConditions.push({
       OR: lostItemSearchableFields.map((field) => ({
         [field]: {
-          contains: params.searchTerm,
+          contains: searchTerm,
           mode: "insensitive",
         },
       })),
@@ -88,19 +88,32 @@ const getLostItemsfromDB = async (params: any, options: TPaginationOptions) => {
 
   // Building filter conditions
   if (Object.keys(filterData).length > 0) {
-    andConditions.push({
-      AND: Object.keys(filterData).map((key) => ({
-        [key]: {
-          equals: (filterData as any)[key],
-        },
-      })),
+    Object.keys(filterData).forEach((key) => {
+      if (filterData.category) {
+      
+        // Handle nested field category.name
+        andConditions.push({
+          category: {
+            name: {
+              equals: filterData.category.name,
+            },
+          },
+        });
+      } else {
+        
+        andConditions.push({
+          [key]: {
+            equals: filterData[key],
+          },
+        });
+      }
     });
   }
 
   const whereConditions: Prisma.LostItemWhereInput =
     andConditions.length > 0 ? { AND: andConditions } : {};
 
-  // Fetching found items from the database
+  // Fetching lost items from the database
   const result = await prisma.lostItem.findMany({
     where: whereConditions,
     skip,
@@ -123,14 +136,15 @@ const getLostItemsfromDB = async (params: any, options: TPaginationOptions) => {
       itemImg: true,
       createdAt: true,
       updatedAt: true,
-      lostItemStatus: true
+      lostItemStatus: true,
+      lostDate: true,
+      contactNo: true,
     },
   });
 
-  // Getting total count of found items for pagination
+  // Getting total count of lost items for pagination
   const total = await prisma.lostItem.count({
     where: whereConditions,
-
   });
 
   return {
@@ -142,6 +156,7 @@ const getLostItemsfromDB = async (params: any, options: TPaginationOptions) => {
     data: result,
   };
 };
+
 
 const getMyLostItemsFromDB = async (
   user: TAuthUser,
@@ -238,7 +253,7 @@ const updateLostItemIntoDB = async (payload: any, user: TAuthUser) => {
       claim: true, // Include claims
     },
   });
-
+console.log(existingItem)
   if (!existingItem) {
     throw new AppError(
       httpStatus.NOT_FOUND,
@@ -246,6 +261,7 @@ const updateLostItemIntoDB = async (payload: any, user: TAuthUser) => {
     );
   }
 
+ if(payload?.categoryId){
   const categoryExists = await prisma.itemCategory.findUnique({
     where: {
       id: payload.categoryId,
@@ -257,6 +273,8 @@ const updateLostItemIntoDB = async (payload: any, user: TAuthUser) => {
       "There is no category with this name"
     );
   }
+ }
+  
 
   // Checking if the item is under claim or marked as "FOUND"
   const hasActiveClaim = existingItem.claim.some((claim) => !claim.isDeleted);

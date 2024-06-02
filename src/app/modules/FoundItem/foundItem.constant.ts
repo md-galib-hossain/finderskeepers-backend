@@ -1,13 +1,9 @@
-export const founditemSearchableFields: string[] = [
-    "name",
-    "location",
-    "description",
-  ];
-  export const founditemFilterableFields: string[] = [
-    "name",
-    "searchTerm","location","category.name"
-  ];
-  
+export const foundItemSearchableFields: string[] = [
+  "name",
 
-
-
+  "description",
+];
+export const foundItemFilterableFields: string[] = [
+  "name",
+  "searchTerm","location","category"
+];
