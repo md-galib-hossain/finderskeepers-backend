@@ -7,7 +7,7 @@ import globalErrorHandler from "./app/middlewares/globalErrorHandler";
 import httpStatus from "http-status";
 const app: Application = express();
 
-app.use(cors({origin : "http://localhost:3000", credentials : true}));
+app.use(cors({origin : "https://finderskeepers-frontend.vercel.app", credentials : true}));
 app.use(cookieParser());
 
 //parser
