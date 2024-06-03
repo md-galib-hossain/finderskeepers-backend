@@ -8,6 +8,7 @@ import { ItemCategoryService } from "./itemcategory.service";
 // Controller function to create a new found item category
 const createItemCategory = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    console.log("ho asi")
     // Extracting authorization token from request headers
     const token = req.headers.authorization;
 

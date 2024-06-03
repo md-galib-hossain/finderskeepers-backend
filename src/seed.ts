@@ -21,7 +21,7 @@ const seedAdmin = async () => {
     const hashedPassword = await bcrypt.hash("123456", 10);
 
     // Generate a unique userName based on the email
-    const email = "admin@example.com";
+    const email = "admin@gmail.com";
     const userName = email.split("@")[0]; // Extract the username part of the email
 
     // Create the admin user

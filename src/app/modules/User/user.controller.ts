@@ -72,6 +72,7 @@ const updateMyProfile = catchAsync(async (req, res) => {
 // Controller function to update the current user's profile
 const updateUserStatus = catchAsync(async (req, res) => {
 const {id} = req.params
+
   const result = await userService.updateUserStatus(id, req.body);
   sendResponse(res, {
     statusCode: httpStatus.OK,
