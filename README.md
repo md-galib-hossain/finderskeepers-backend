@@ -117,3 +117,16 @@ You can test the endpoints using tools like Postman or by integrating them with 
   - Frontend: [Finders Keepers Frontend Live Site](https://finderskeepers-frontend.vercel.app/)
   - Backend: [Finders Keepers Backend Live Site](https://finderskeepers-backend.onrender.com)
 - **Video Demo**: [Watch the demo](https://drive.google.com/file/d/1Uc7fH8nCvRMa3jItDVsBItDMl-ubfvps/view?usp=sharing)
+
+## Credentials
+
+- **Admin Role Account**: 
+  - Email: admin@gmail.com
+  - Password: 123456  
+- **User Role Accounts**: 
+  - Email: test@gmail.com
+  - Password: 123456
+  - Email: test1@gmail.com
+  - Password: 123456
+  - Email: test3@gmail.com
+  - Password: 123456
